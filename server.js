@@ -5,6 +5,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');  // Import fs module to delete files
 
 dotenv.config();
 const app = express();
@@ -25,7 +26,24 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+// File filter function to allow only specific file types
+const fileFilter = (req, file, cb) => {
+  // Allowed file types: .pdf, .docx, .csv
+  const allowedTypes = ['.pdf', '.docx', '.csv'];
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+
+  if (allowedTypes.includes(fileExtension)) {
+    cb(null, true); // Accept the file
+  } else {
+    cb(new Error('Invalid file type. Only .pdf, .docx, and .csv files are allowed.'), false); // Reject the file
+  }
+};
+
+// Initialize multer with fileFilter
+const upload = multer({ 
+  storage, 
+  fileFilter, // Add fileFilter to restrict file types
+});
 
 // Route for file uploads
 app.post('/api/files', upload.single('file'), (req, res) => {
@@ -40,7 +58,6 @@ app.post('/api/files', upload.single('file'), (req, res) => {
 
 // Route to get uploaded files
 app.get('/api/files', (req, res) => {
-  const fs = require('fs');
   const filesDirectory = './uploads';
 
   fs.readdir(filesDirectory, (err, files) => {
@@ -59,6 +76,24 @@ app.get('/api/files', (req, res) => {
 
 // Serve static files (uploads)
 app.use('/uploads', express.static('uploads')); // Ensure that files can be accessed publicly
+
+// Route to delete a file
+app.delete('/api/files/:fileId', (req, res) => {
+  const { fileId } = req.params; // This should be the file's name (e.g., '1732386741555.pdf')
+  console.log(`Deleting file with ID: ${fileId}`);
+
+  const filePath = path.join(__dirname, 'uploads', fileId);  // Construct file path
+
+  // Try to delete the file
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error('Error deleting file:', err);
+      return res.status(500).json({ error: 'Error deleting file' });
+    }
+
+    res.status(200).json({ message: 'File deleted successfully' });
+  });
+});
 
 // Routes for authentication
 app.use('/api/auth', authRoutes);

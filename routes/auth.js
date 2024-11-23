@@ -32,6 +32,8 @@ router.post('/register', async (req, res) => {
 });
 
 // User Login
+// routes/auth.js
+
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -46,8 +48,9 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
+        // Include isAdmin in the JWT token
         const token = jwt.sign(
-            { id: user._id, name: user.name },
+            { id: user._id, name: user.name, isAdmin: user.isAdmin },  // Include the user's isAdmin flag
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -59,19 +62,22 @@ router.post('/login', async (req, res) => {
     }
 });
 
+
 // **Add the `/me` route to fetch the logged-in user's data**
+// routes/auth.js
 router.get('/me', authMiddleware, async (req, res) => {
     try {
-        const user = await User.findById(req.user).select('-password');
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.json(user); // Send back user details excluding the password
+      const user = await User.findById(req.user.id).select('-password');  // Make sure the user ID is correct
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.json(user);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
     }
-});
+  });
+  
 
 // routes/auth.js
 

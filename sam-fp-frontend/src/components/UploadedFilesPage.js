@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 
 const UploadedFilesPage = () => {
   const [files, setFiles] = useState([]);
   const [file, setFile] = useState(null);
   const [userName, setUserName] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/files', {
-          headers: {
-            'x-auth-token': localStorage.getItem('token'),
-          },
+          headers: { 'x-auth-token': localStorage.getItem('token') },
         });
-        console.log(response.data);
         setFiles(response.data.files);
       } catch (error) {
         console.error('Error fetching files:', error);
@@ -24,90 +23,118 @@ const UploadedFilesPage = () => {
       }
     };
 
-    // Fetch username from the token (JWT)
     const fetchUserDetails = () => {
       const token = localStorage.getItem('token');
       if (token) {
-        console.log("Token:", token);  // Log token to check its structure
-        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT token
-        console.log("Decoded Token:", decodedToken);  // Log decoded token
-    
-        if (decodedToken && decodedToken.name) {
-          setUserName(decodedToken.name);  // Set the name if available
-        }
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        setUserName(decodedToken.name);
+        setIsAdmin(decodedToken.isAdmin || false);
       }
     };
-    
 
     fetchFiles();
-    fetchUserDetails();  // Get the username
-
+    fetchUserDetails();
   }, []);
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
+    if (!file) {
+      alert('Please select a file.');
+      return;
+    }
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/csv',
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Invalid file type. Only .pdf, .docx, and .csv files are allowed.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
 
     try {
       const response = await axios.post('http://localhost:5000/api/files', formData, {
-        headers: {
-          'x-auth-token': localStorage.getItem('token'),
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'x-auth-token': localStorage.getItem('token'), 'Content-Type': 'multipart/form-data' },
       });
-      console.log(response.data);
       alert('File uploaded successfully');
-      setFiles(prevFiles => [...prevFiles, response.data.file]);
+      setFiles((prevFiles) => [...prevFiles, response.data.file]);
     } catch (error) {
       console.error(error);
       alert('Error uploading file');
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/';
-  };
+  const handleDeleteFile = async (filePath) => {
+    const fileId = filePath.split('/').pop();
+    if (!fileId) return;
 
-  const handleGoToAccount = () => {
-    navigate('/account');
+    try {
+      await axios.delete(`http://localhost:5000/api/files/${fileId}`, {
+        headers: { 'x-auth-token': localStorage.getItem('token') },
+      });
+      setFiles((prevFiles) => prevFiles.filter((file) => file.path !== filePath));
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert('Error deleting file');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center">
-      {/* Top bar with Logout and Account navigation */}
-      <div className="absolute top-0 right-0 p-4 space-x-4">
-        <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded">
-          Logout
-        </button>
-        <button onClick={handleGoToAccount} className="bg-green-600 text-white px-4 py-2 rounded">
-          Go to Account
-        </button>
-      </div>
-      
-      {/* Welcome message */}
-      <h1 className="text-4xl mb-6">Welcome, {userName || 'Guest'}!</h1>
+    <div className="min-h-screen bg-gray-900 text-white">
+      <Navbar />
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-6">Welcome, {userName || 'Guest'}!</h1>
+        <h2 className="text-2xl font-semibold mb-4">Uploaded Files</h2>
 
-      <h2 className="text-xl mb-4">Uploaded Files</h2>
+        <form onSubmit={handleFileUpload} className="bg-gray-800 p-6 rounded shadow-md mb-6">
+          <label className="block mb-4">
+            <span className="block mb-2">Select a file (PDF, DOCX, CSV):</span>
+            <input
+              type="file"
+              accept=".pdf,.docx,.csv"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="block w-full px-4 py-2 bg-gray-700 text-white rounded"
+              required
+            />
+          </label>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-green-500 rounded hover:bg-green-600"
+          >
+            Upload
+          </button>
+        </form>
 
-      <form onSubmit={handleFileUpload} className="space-y-4 mb-6">
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-          className="p-2 rounded bg-gray-800 w-64"
-        />
-        <button type="submit" className="bg-blue-600 px-4 py-2 rounded w-64">Upload</button>
-      </form>
-
-      <div>
-        {files.map((file, index) => (
-          <div key={index} className="bg-gray-700 p-4 mb-2 rounded">
-            <a href={`http://localhost:5000${file.path}`} target="_blank" rel="noopener noreferrer">
-              {file.originalname}
-            </a>
-          </div>
-        ))}
+        <div>
+          {files.length === 0 ? (
+            <p className="text-center">No files uploaded.</p>
+          ) : (
+            files.map((file) => (
+              <div key={file.originalname} className="bg-gray-700 p-4 mb-4 rounded shadow-md">
+                <a
+                  href={`http://localhost:5000${file.path}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
+                  {file.originalname}
+                </a>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteFile(file.path)}
+                    className="ml-4 bg-red-600 px-4 py-2 rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

@@ -26,10 +26,6 @@ const Navbar = () => {
           Back
         </button>
 
-        {/* Logo or App name */}
-        <div className="text-xl font-semibold">
-          <Link to="/">MyApp</Link>
-        </div>
 
         {/* Navbar links */}
         <div className="space-x-6 hidden md:flex">
@@ -40,7 +36,7 @@ const Navbar = () => {
             Account
           </Link>
           <Link
-            to="/upload"
+            to="/uploaded-files"
             className="hover:text-blue-400 py-2 px-4 rounded-md border-2 border-transparent hover:border-blue-400 transition duration-200"
           >
             Upload Files
