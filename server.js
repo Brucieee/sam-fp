@@ -8,6 +8,8 @@ const path = require('path');
 const fs = require('fs');  // Import fs module to delete files
 
 dotenv.config();
+console.log("MongoDB URI:", process.env.MONGO_URI);
+
 const app = express();
 
 // Enable CORS for frontend to connect
