@@ -5,18 +5,19 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');  // Import fs module to delete files
+const fs = require('fs');
 
 dotenv.config();
 console.log("MongoDB URI:", process.env.MONGO_URI);
 
 const app = express();
 
-// Enable CORS for frontend to connect
+// Enable CORS globally for all routes, including preflight OPTIONS requests
 app.use(cors({
   origin: 'http://18.143.64.225:3000', // Frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
-  credentials: true // Allow credentials (if needed)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+  credentials: true, // Allow credentials (cookies)
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
 }));
 
 // Middleware to parse JSON requests
@@ -34,7 +35,6 @@ const storage = multer.diskStorage({
 
 // File filter function to allow only specific file types
 const fileFilter = (req, file, cb) => {
-  // Allowed file types: .pdf, .docx, .csv
   const allowedTypes = ['.pdf', '.docx', '.csv'];
   const fileExtension = path.extname(file.originalname).toLowerCase();
 
@@ -46,8 +46,8 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Initialize multer with fileFilter
-const upload = multer({ 
-  storage, 
+const upload = multer({
+  storage,
   fileFilter, // Add fileFilter to restrict file types
 });
 
@@ -81,16 +81,15 @@ app.get('/api/files', (req, res) => {
 });
 
 // Serve static files (uploads)
-app.use('/uploads', express.static('uploads')); // Ensure that files can be accessed publicly
+app.use('/uploads', express.static('uploads'));
 
 // Route to delete a file
 app.delete('/api/files/:fileId', (req, res) => {
-  const { fileId } = req.params; // This should be the file's name (e.g., '1732386741555.pdf')
+  const { fileId } = req.params;
   console.log(`Deleting file with ID: ${fileId}`);
 
-  const filePath = path.join(__dirname, 'uploads', fileId);  // Construct file path
+  const filePath = path.join(__dirname, 'uploads', fileId); // Construct file path
 
-  // Try to delete the file
   fs.unlink(filePath, (err) => {
     if (err) {
       console.error('Error deleting file:', err);
