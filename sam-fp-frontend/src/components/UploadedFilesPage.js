@@ -11,7 +11,7 @@ const UploadedFilesPage = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/files', {
+        const response = await axios.get('http://18.143.64.225:5000/api/files', {
           headers: { 'x-auth-token': localStorage.getItem('token') },
         });
         setFiles(response.data.files);
@@ -55,7 +55,7 @@ const UploadedFilesPage = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/files', formData, {
+      const response = await axios.post('http://18.143.64.225:5000/api/files', formData, {
         headers: { 'x-auth-token': localStorage.getItem('token'), 'Content-Type': 'multipart/form-data' },
       });
       alert('File uploaded successfully');
@@ -71,7 +71,7 @@ const UploadedFilesPage = () => {
     if (!fileId) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/files/${fileId}`, {
+      await axios.delete(`http://18.143.64.225:5000/api/files/${fileId}`, {
         headers: { 'x-auth-token': localStorage.getItem('token') },
       });
       setFiles((prevFiles) => prevFiles.filter((file) => file.path !== filePath));
@@ -114,7 +114,7 @@ const UploadedFilesPage = () => {
             files.map((file) => (
               <div key={file.originalname} className="bg-gray-700 p-4 mb-4 rounded shadow-md">
                 <a
-                  href={`http://localhost:5000${file.path}`}
+                  href={`http://18.143.64.225:5000${file.path}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 hover:underline"
