@@ -116,7 +116,5 @@ router.put('/update', authMiddleware, async (req, res) => {
     }
 });
 
-console.log('Request user:', req.user); // Log the authenticated user object
-console.log('Updating user:', req.body); // Log the request body for update
 
 module.exports = router;
