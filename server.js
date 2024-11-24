@@ -6,18 +6,19 @@ const authRoutes = require('./routes/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const authMiddleware = require('./middleware/authMiddleware');  // Import the auth middleware
 
 dotenv.config();
 console.log("MongoDB URI:", process.env.MONGO_URI);
 
 const app = express();
 
-// Enable CORS globally for all routes, including preflight OPTIONS requests
+// Enable CORS globally for all routes
 app.use(cors({
   origin: 'http://18.143.64.225:3000', // Frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
   credentials: true, // Allow credentials (cookies)
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'], // Allow specific headers including 'x-auth-token'
 }));
 
 // Middleware to parse JSON requests
@@ -52,7 +53,7 @@ const upload = multer({
 });
 
 // Route for file uploads
-app.post('/api/files', upload.single('file'), (req, res) => {
+app.post('/api/files', authMiddleware, upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
@@ -63,7 +64,7 @@ app.post('/api/files', upload.single('file'), (req, res) => {
 });
 
 // Route to get uploaded files
-app.get('/api/files', (req, res) => {
+app.get('/api/files', authMiddleware, (req, res) => {
   const filesDirectory = './uploads';
 
   fs.readdir(filesDirectory, (err, files) => {
@@ -84,7 +85,7 @@ app.get('/api/files', (req, res) => {
 app.use('/uploads', express.static('uploads'));
 
 // Route to delete a file
-app.delete('/api/files/:fileId', (req, res) => {
+app.delete('/api/files/:fileId', authMiddleware, (req, res) => {
   const { fileId } = req.params;
   console.log(`Deleting file with ID: ${fileId}`);
 
