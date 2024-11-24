@@ -11,15 +11,17 @@ const authMiddleware = require('./middleware/authMiddleware');  // Import the au
 dotenv.config();
 console.log("MongoDB URI:", process.env.MONGO_URI);
 
+const cors = require('cors');
 const app = express();
 
 // Enable CORS globally for all routes
 app.use(cors({
-  origin: 'http://18.143.64.225:3000', // Frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-  credentials: true, // Allow credentials (cookies)
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'], // Allow specific headers including 'x-auth-token'
+  origin: 'http://18.143.64.225:3000', // Allow the frontend's domain
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow all the necessary HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'], // Allow these headers
+  credentials: true, // Allow cookies and credentials (if needed)
 }));
+
 
 // Middleware to parse JSON requests
 app.use(express.json());
