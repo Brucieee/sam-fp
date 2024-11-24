@@ -82,11 +82,13 @@ router.get('/me', authMiddleware, async (req, res) => {
 // routes/auth.js
 
 // Update User Info
+// Update User Info
 router.put('/update', authMiddleware, async (req, res) => {
     const { name, email, currentPassword, newPassword } = req.body;
 
     try {
-        const user = await User.findById(req.user);
+        // Correctly find the user using req.user.id
+        const user = await User.findById(req.user.id); 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -105,6 +107,7 @@ router.put('/update', authMiddleware, async (req, res) => {
             user.password = await bcrypt.hash(newPassword, salt);
         }
 
+        // Save the updated user
         await user.save();
         res.status(200).json({ message: 'User updated successfully', user });
     } catch (error) {
@@ -112,5 +115,8 @@ router.put('/update', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+console.log('Request user:', req.user); // Log the authenticated user object
+console.log('Updating user:', req.body); // Log the request body for update
 
 module.exports = router;
