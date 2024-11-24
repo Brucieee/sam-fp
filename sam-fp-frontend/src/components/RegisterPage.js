@@ -11,7 +11,7 @@ const RegisterPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://18.143.64.225:5000/api/auth/register', { name, email, password });
+      await axios.post('http://18.143.64.225/api/auth/register', { name, email, password });
       navigate('/login');
     } catch (error) {
       console.error(error);

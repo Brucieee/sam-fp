@@ -21,7 +21,7 @@ const AccountPage = () => {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('http://18.143.64.225:5000:5000/api/auth/me', {
+        const response = await axios.get('http://18.143.64.225:5000/api/auth/me', {
           headers: { 'x-auth-token': token }, // Include token in the header
         });
         setUser(response.data);
