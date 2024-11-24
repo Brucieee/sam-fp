@@ -13,7 +13,11 @@ console.log("MongoDB URI:", process.env.MONGO_URI);
 const app = express();
 
 // Enable CORS for frontend to connect
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({
+  origin: 'http://18.143.64.225:3000', // Frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+  credentials: true // Allow credentials (if needed)
+}));
 
 // Middleware to parse JSON requests
 app.use(express.json());
