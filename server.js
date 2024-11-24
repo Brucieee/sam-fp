@@ -1,7 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors = require('cors'); // Only import once
 const authRoutes = require('./routes/auth');
 const multer = require('multer');
 const path = require('path');
@@ -11,7 +11,6 @@ const authMiddleware = require('./middleware/authMiddleware');  // Import the au
 dotenv.config();
 console.log("MongoDB URI:", process.env.MONGO_URI);
 
-const cors = require('cors');
 const app = express();
 
 // Enable CORS globally for all routes
@@ -21,7 +20,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'], // Allow these headers
   credentials: true, // Allow cookies and credentials (if needed)
 }));
-
 
 // Middleware to parse JSON requests
 app.use(express.json());
