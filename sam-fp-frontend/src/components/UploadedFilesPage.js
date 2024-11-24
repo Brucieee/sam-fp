@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const UploadedFilesPage = () => {
@@ -8,7 +7,6 @@ const UploadedFilesPage = () => {
   const [file, setFile] = useState(null);
   const [userName, setUserName] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFiles = async () => {

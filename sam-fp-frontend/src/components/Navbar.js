@@ -1,8 +1,7 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // If you're using React Router for navigation
+import { Link } from 'react-router-dom'; // If you're using React Router for navigation
 
 const Navbar = () => {
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     // Handle logout logic (e.g., remove token from localStorage, etc.)
