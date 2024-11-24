@@ -21,7 +21,7 @@ const AccountPage = () => {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('http://18.143.64.225:5000/api/auth/me', {
+        const response = await axios.get('http://18.143.64.225/api/auth/me', {
           headers: { 'x-auth-token': token }, // Include token in the header
         });
         setUser(response.data);
@@ -50,7 +50,7 @@ const AccountPage = () => {
     try {
       // Make the PUT request to update user data
       const response = await axios.put(
-        'http://18.143.64.225:5000/api/auth/update', // Ensure the correct endpoint
+        'http://18.143.64.225/api/auth/update', // Ensure the correct endpoint
         { name, email, currentPassword, newPassword }, // Send the updated data
         { headers: { 'x-auth-token': token } } // Include the token in the header for authentication
       );
